@@ -26,6 +26,7 @@
   <link rel="apple-touch-icon" href="icons/icon-512x512.png" sizes="512x512" type="image/png" />
 
   <meta name="theme-color" content="#000" />
+<link href="https://fonts.googleapis.com/css2?family=Zen+Antique&display=swap" rel="stylesheet">
 
   <style>
     html {
@@ -167,16 +168,30 @@
       color: #ffffff
     }
 
-    #presplash {
-        position: absolute;
-        top: 0;
-        left: 0;
-        display: block;
-        margin: auto;
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-    }
+#presplash {
+    display: none;
+}
+
+#custom-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+#custom-loading p {
+    color: #cc0000;
+    font-size: 32px;
+    font-family: 'Zen Antique', serif;
+    letter-spacing: 4px;
+}
 
   </style>
 
@@ -187,6 +202,9 @@
   <div id="overlayDiv"></div>
 
   <img id="presplash" src="web-presplash.jpg">
+<div id="custom-loading">
+  <p>Loading...</p>
+</div>
 
   <div id="ContextContainer">
     <a id="ContextButton">&#8801;</a><br />
@@ -225,6 +243,12 @@
               navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'all' });
           }
       }
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        var el = document.getElementById('custom-loading');
+        if (el) el.style.display = 'none';
+    }, 3000);
+});
   </script>
   <script src="renpy-pre.js"></script>
   <script async type="text/javascript" src="renpy.js"></script>
