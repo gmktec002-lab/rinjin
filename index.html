@@ -26,7 +26,7 @@
   <link rel="apple-touch-icon" href="icons/icon-512x512.png" sizes="512x512" type="image/png" />
 
   <meta name="theme-color" content="#000" />
-<link href="https://fonts.googleapis.com/css2?family=Zen+Antique&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Antique&display=swap" rel="stylesheet">
 
   <style>
     html {
@@ -168,6 +168,17 @@
       color: #ffffff
     }
 
+    #presplash {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: block;
+        margin: auto;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
 #presplash {
     display: none;
 }
@@ -193,6 +204,98 @@
     letter-spacing: 4px;
 }
 
+#next-games-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    z-index: 99999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: 'Zen Antique', serif;
+    color: #fff;
+}
+#next-games-overlay.visible {
+    display: flex;
+}
+#next-games-panel {
+    background: #1a1a1a;
+    padding: 30px 40px;
+    border-radius: 16px;
+    max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(255, 0, 0, 0.3);
+}
+#next-games-panel h2 {
+    color: #cc0000;
+    font-size: 28px;
+    margin-bottom: 16px;
+    letter-spacing: 4px;
+}
+#next-games-tagline {
+    margin: 12px 0 20px;
+    font-size: 16px;
+    color: #eee;
+}
+#next-games-slider {
+    position: relative;
+    width: 400px;
+    max-width: 100%;
+    height: 250px;
+    margin: 20px auto;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #333;
+}
+#next-games-slider img {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
+}
+#next-games-slider img.active {
+    opacity: 1;
+}
+#next-games-line-button {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 16px 40px;
+    background: #06c755;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 999px;
+    font-size: 18px;
+    font-weight: bold;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+#next-games-line-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(6, 199, 85, 0.5);
+}
+#next-games-close {
+    display: block;
+    margin: 16px auto 0;
+    padding: 8px 24px;
+    background: transparent;
+    color: #aaa;
+    border: 1px solid #555;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: inherit;
+}
+#next-games-close:hover {
+    color: #fff;
+    border-color: #888;
+}
   </style>
 
 </head>
@@ -202,9 +305,9 @@
   <div id="overlayDiv"></div>
 
   <img id="presplash" src="web-presplash.jpg">
-<div id="custom-loading">
-  <p>Loading...</p>
-</div>
+  <div id="custom-loading">
+    <p>Loading...</p>
+  </div>
 
   <div id="ContextContainer">
     <a id="ContextButton">&#8801;</a><br />
@@ -243,15 +346,77 @@
               navigator.serviceWorker.register('./service-worker.js', { updateViaCache: 'all' });
           }
       }
-window.addEventListener('load', function() {
-    setTimeout(function() {
-        var el = document.getElementById('custom-loading');
-        if (el) el.style.display = 'none';
-    }, 3000);
-});
+      window.addEventListener('load', function() {
+          setTimeout(function() {
+              var el = document.getElementById('custom-loading');
+              if (el) el.style.display = 'none';
+          }, 3000);
+      });
   </script>
   <script src="renpy-pre.js"></script>
   <script async type="text/javascript" src="renpy.js"></script>
+<div id="next-games-overlay">
+  <div id="next-games-panel">
+    <h2>遊んでくれてありがとう!</h2>
+    <p id="next-games-tagline">他のゲームも遊べます🎮</p>
+    <div id="next-games-slider">
+      <img src="thumbnails/game_1.png" alt="ゲーム1" class="active">
+      <img src="thumbnails/game_2.png" alt="ゲーム2">
+      <img src="thumbnails/game_3.png" alt="ゲーム3">
+    </div>
+    <a id="next-games-line-button" 
+       href="https://line.me/R/ti/p/@DUMMY_LINE_ID"
+       target="_blank">
+       LINEで友だち追加
+    </a>
+    <button id="next-games-close" onclick="hideNextGamesPanel()">
+      閉じる
+    </button>
+  </div>
+</div>
+
+<script>
+(function() {
+  var slideIndex = 0;
+  var slideTimer = null;
+  
+  function startSlideshow() {
+    var slides = document.querySelectorAll('#next-games-slider img');
+    if (slides.length === 0) return;
+    
+    slideTimer = setInterval(function() {
+      slides[slideIndex].classList.remove('active');
+      slideIndex = (slideIndex + 1) % slides.length;
+      slides[slideIndex].classList.add('active');
+    }, 3000);
+  }
+  
+  function stopSlideshow() {
+    if (slideTimer) {
+      clearInterval(slideTimer);
+      slideTimer = null;
+    }
+  }
+  
+  window.showNextGamesPanel = function(ending) {
+    var overlay = document.getElementById('next-games-overlay');
+    if (!overlay) return;
+    overlay.classList.add('visible');
+    startSlideshow();
+    
+    if (window.console && console.debug) {
+      console.debug('[next_games_panel] shown', ending);
+    }
+  };
+  
+  window.hideNextGamesPanel = function() {
+    var overlay = document.getElementById('next-games-overlay');
+    if (!overlay) return;
+    overlay.classList.remove('visible');
+    stopSlideshow();
+  };
+})();
+</script>
 </body>
 
 </html>
