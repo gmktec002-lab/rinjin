@@ -328,6 +328,98 @@
         font-size: 16px;
     }
 }
+
+#entry-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 99998;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: 'Zen Antique', serif;
+    color: #fff;
+}
+#entry-overlay.visible {
+    display: flex;
+}
+#entry-panel {
+    background: #1a1a1a;
+    padding: 50px 60px;
+    border-radius: 16px;
+    width: 80%;
+    max-width: 600px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(255, 0, 0, 0.4);
+    box-sizing: border-box;
+}
+#entry-title {
+    color: #cc0000;
+    font-size: 64px;
+    font-weight: bold;
+    letter-spacing: 8px;
+    margin: 0 0 16px;
+    line-height: 1;
+}
+#entry-subtitle {
+    color: #eee;
+    font-size: 18px;
+    margin: 0 0 40px;
+    letter-spacing: 2px;
+}
+.entry-button {
+    display: block;
+    width: 100%;
+    padding: 18px 30px;
+    margin: 12px 0;
+    border-radius: 999px;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+.entry-button:hover {
+    transform: translateY(-2px);
+}
+.entry-button-play {
+    background: #cc0000;
+    color: #fff;
+}
+.entry-button-play:hover {
+    box-shadow: 0 4px 16px rgba(204, 0, 0, 0.5);
+}
+.entry-button-line {
+    background: #06c755;
+    color: #fff;
+}
+.entry-button-line:hover {
+    box-shadow: 0 4px 16px rgba(6, 199, 85, 0.5);
+}
+
+@media (max-width: 768px) {
+    #entry-panel {
+        width: 92%;
+        padding: 40px 24px;
+    }
+    #entry-title {
+        font-size: 48px;
+    }
+    #entry-subtitle {
+        font-size: 14px;
+    }
+    .entry-button {
+        font-size: 16px;
+        padding: 16px 20px;
+    }
+}
   </style>
 
 </head>
@@ -393,18 +485,24 @@
     <p id="next-games-tagline">下のボタンからLINE追加で、他のゲームも遊べます!</p>
     <div id="next-games-carousel-wrapper">
       <div id="next-games-carousel-track">
-        <!-- 元画像3枚 -->
+        <!-- 元画像6枚 -->
         <div class="next-games-card"><img src="thumbnails/game_1.png" alt="ゲーム1"></div>
         <div class="next-games-card"><img src="thumbnails/game_2.png" alt="ゲーム2"></div>
         <div class="next-games-card"><img src="thumbnails/game_3.png" alt="ゲーム3"></div>
+        <div class="next-games-card"><img src="thumbnails/game_4.png" alt="ゲーム4"></div>
+        <div class="next-games-card"><img src="thumbnails/game_5.png" alt="ゲーム5"></div>
+        <div class="next-games-card"><img src="thumbnails/game_6.png" alt="ゲーム6"></div>
         <!-- ループ用に複製 -->
         <div class="next-games-card"><img src="thumbnails/game_1.png" alt="ゲーム1"></div>
         <div class="next-games-card"><img src="thumbnails/game_2.png" alt="ゲーム2"></div>
         <div class="next-games-card"><img src="thumbnails/game_3.png" alt="ゲーム3"></div>
+        <div class="next-games-card"><img src="thumbnails/game_4.png" alt="ゲーム4"></div>
+        <div class="next-games-card"><img src="thumbnails/game_5.png" alt="ゲーム5"></div>
+        <div class="next-games-card"><img src="thumbnails/game_6.png" alt="ゲーム6"></div>
       </div>
     </div>
     <a id="next-games-line-button" 
-       href="https://line.me/R/ti/p/@DUMMY_LINE_ID"
+       href="https://line.me/R/ti/p/@682mzlei"
        target="_blank">
        LINEを追加して他のゲームも遊ぶ
     </a>
@@ -418,7 +516,7 @@
 (function() {
   var carouselIndex = 0;
   var carouselTimer = null;
-  var totalOriginal = 3;  // 元画像の枚数
+  var totalOriginal = 6;  // 元画像の枚数
   
   function startCarousel() {
     var track = document.getElementById('next-games-carousel-track');
@@ -486,6 +584,46 @@
     if (!overlay) return;
     overlay.classList.remove('visible');
     stopCarousel();
+  };
+})();
+</script>
+
+<div id="entry-overlay">
+  <div id="entry-panel">
+    <h1 id="entry-title">隣人</h1>
+    <p id="entry-subtitle">ホラービジュアルノベル</p>
+    <button class="entry-button entry-button-play" onclick="startGameNow()">
+      今すぐ遊ぶ
+    </button>
+    <a class="entry-button entry-button-line" 
+       href="https://line.me/R/ti/p/@682mzlei"
+       target="_blank">
+       LINEを追加して後で遊ぶ
+    </a>
+  </div>
+</div>
+
+<script>
+(function() {
+  // カスタムローディング消滅後、entry-overlay を表示
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      var entry = document.getElementById('entry-overlay');
+      if (entry) {
+        entry.classList.add('visible');
+      }
+    }, 3100);  // カスタムローディング(3000ms)の直後
+  });
+  
+  window.startGameNow = function() {
+    var entry = document.getElementById('entry-overlay');
+    if (entry) {
+      entry.classList.remove('visible');
+    }
+    
+    if (window.console && console.debug) {
+      console.debug('[entry] start_now clicked');
+    }
   };
 })();
 </script>
