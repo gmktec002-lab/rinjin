@@ -223,56 +223,67 @@
 }
 #next-games-panel {
     background: #1a1a1a;
-    padding: 30px 40px;
+    padding: 40px 50px;
     border-radius: 16px;
-    max-width: 90%;
-    max-height: 90vh;
+    width: 80%;
+    max-width: 1100px;
+    max-height: 85vh;
     overflow-y: auto;
     text-align: center;
     box-shadow: 0 8px 32px rgba(255, 0, 0, 0.3);
+    box-sizing: border-box;
 }
 #next-games-panel h2 {
     color: #cc0000;
-    font-size: 28px;
+    font-size: 32px;
     margin-bottom: 16px;
     letter-spacing: 4px;
 }
 #next-games-tagline {
-    margin: 12px 0 20px;
-    font-size: 16px;
+    margin: 12px 0 30px;
+    font-size: 18px;
     color: #eee;
+    line-height: 1.6;
 }
-#next-games-slider {
+
+/* カルーセル(3枚横並び+スクロール) */
+#next-games-carousel-wrapper {
     position: relative;
-    width: 400px;
-    max-width: 100%;
-    height: 250px;
-    margin: 20px auto;
+    width: 100%;
     overflow: hidden;
-    border-radius: 8px;
-    background: #333;
+    margin: 30px 0;
+    padding: 10px 0;
 }
-#next-games-slider img {
-    position: absolute;
-    top: 0; left: 0;
+#next-games-carousel-track {
+    display: flex;
+    gap: 20px;
+    transition: transform 0.6s ease-in-out;
+    will-change: transform;
+}
+.next-games-card {
+    flex: 0 0 calc((100% - 40px) / 3);
+    aspect-ratio: 800 / 500;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #333;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+.next-games-card img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0;
-    transition: opacity 0.8s ease-in-out;
+    display: block;
 }
-#next-games-slider img.active {
-    opacity: 1;
-}
+
 #next-games-line-button {
     display: inline-block;
-    margin-top: 20px;
-    padding: 16px 40px;
+    margin-top: 30px;
+    padding: 18px 50px;
     background: #06c755;
     color: #fff;
     text-decoration: none;
     border-radius: 999px;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
     transition: transform 0.2s, box-shadow 0.2s;
 }
@@ -282,8 +293,8 @@
 }
 #next-games-close {
     display: block;
-    margin: 16px auto 0;
-    padding: 8px 24px;
+    margin: 20px auto 0;
+    padding: 8px 28px;
     background: transparent;
     color: #aaa;
     border: 1px solid #555;
@@ -295,6 +306,27 @@
 #next-games-close:hover {
     color: #fff;
     border-color: #888;
+}
+
+/* スマホ対応 */
+@media (max-width: 768px) {
+    #next-games-panel {
+        width: 92%;
+        padding: 30px 20px;
+    }
+    #next-games-panel h2 {
+        font-size: 24px;
+    }
+    #next-games-tagline {
+        font-size: 14px;
+    }
+    .next-games-card {
+        flex: 0 0 calc((100% - 20px) / 2);
+    }
+    #next-games-line-button {
+        padding: 14px 32px;
+        font-size: 16px;
+    }
 }
   </style>
 
@@ -357,17 +389,24 @@
   <script async type="text/javascript" src="renpy.js"></script>
 <div id="next-games-overlay">
   <div id="next-games-panel">
-    <h2>遊んでくれてありがとう!</h2>
-    <p id="next-games-tagline">他のゲームも遊べます🎮</p>
-    <div id="next-games-slider">
-      <img src="thumbnails/game_1.png" alt="ゲーム1" class="active">
-      <img src="thumbnails/game_2.png" alt="ゲーム2">
-      <img src="thumbnails/game_3.png" alt="ゲーム3">
+    <h2>遊んでいただきありがとうございました!</h2>
+    <p id="next-games-tagline">下のボタンからLINE追加で、他のゲームも遊べます!</p>
+    <div id="next-games-carousel-wrapper">
+      <div id="next-games-carousel-track">
+        <!-- 元画像3枚 -->
+        <div class="next-games-card"><img src="thumbnails/game_1.png" alt="ゲーム1"></div>
+        <div class="next-games-card"><img src="thumbnails/game_2.png" alt="ゲーム2"></div>
+        <div class="next-games-card"><img src="thumbnails/game_3.png" alt="ゲーム3"></div>
+        <!-- ループ用に複製 -->
+        <div class="next-games-card"><img src="thumbnails/game_1.png" alt="ゲーム1"></div>
+        <div class="next-games-card"><img src="thumbnails/game_2.png" alt="ゲーム2"></div>
+        <div class="next-games-card"><img src="thumbnails/game_3.png" alt="ゲーム3"></div>
+      </div>
     </div>
     <a id="next-games-line-button" 
        href="https://line.me/R/ti/p/@DUMMY_LINE_ID"
        target="_blank">
-       LINEで友だち追加
+       LINEを追加して他のゲームも遊ぶ
     </a>
     <button id="next-games-close" onclick="hideNextGamesPanel()">
       閉じる
@@ -377,24 +416,55 @@
 
 <script>
 (function() {
-  var slideIndex = 0;
-  var slideTimer = null;
+  var carouselIndex = 0;
+  var carouselTimer = null;
+  var totalOriginal = 3;  // 元画像の枚数
   
-  function startSlideshow() {
-    var slides = document.querySelectorAll('#next-games-slider img');
-    if (slides.length === 0) return;
+  function startCarousel() {
+    var track = document.getElementById('next-games-carousel-track');
+    if (!track) return;
     
-    slideTimer = setInterval(function() {
-      slides[slideIndex].classList.remove('active');
-      slideIndex = (slideIndex + 1) % slides.length;
-      slides[slideIndex].classList.add('active');
+    // 初期位置リセット
+    carouselIndex = 0;
+    track.style.transition = 'none';
+    track.style.transform = 'translateX(0)';
+    
+    // 強制リフロー
+    void track.offsetWidth;
+    track.style.transition = 'transform 0.6s ease-in-out';
+    
+    if (carouselTimer) clearInterval(carouselTimer);
+    
+    carouselTimer = setInterval(function() {
+      var wrapper = document.getElementById('next-games-carousel-wrapper');
+      if (!wrapper) return;
+      
+      var cards = track.querySelectorAll('.next-games-card');
+      if (cards.length === 0) return;
+      
+      var cardWidth = cards[0].offsetWidth;
+      var gap = 20;
+      var step = cardWidth + gap;
+      
+      carouselIndex++;
+      track.style.transition = 'transform 0.6s ease-in-out';
+      track.style.transform = 'translateX(-' + (step * carouselIndex) + 'px)';
+      
+      // 元画像の最後まで来たら、瞬時に最初に戻す(無限ループ風)
+      if (carouselIndex >= totalOriginal) {
+        setTimeout(function() {
+          track.style.transition = 'none';
+          carouselIndex = 0;
+          track.style.transform = 'translateX(0)';
+        }, 600);
+      }
     }, 3000);
   }
   
-  function stopSlideshow() {
-    if (slideTimer) {
-      clearInterval(slideTimer);
-      slideTimer = null;
+  function stopCarousel() {
+    if (carouselTimer) {
+      clearInterval(carouselTimer);
+      carouselTimer = null;
     }
   }
   
@@ -402,7 +472,9 @@
     var overlay = document.getElementById('next-games-overlay');
     if (!overlay) return;
     overlay.classList.add('visible');
-    startSlideshow();
+    
+    // 少し待ってからカルーセル開始(レイアウト確定後)
+    setTimeout(startCarousel, 100);
     
     if (window.console && console.debug) {
       console.debug('[next_games_panel] shown', ending);
@@ -413,7 +485,7 @@
     var overlay = document.getElementById('next-games-overlay');
     if (!overlay) return;
     overlay.classList.remove('visible');
-    stopSlideshow();
+    stopCarousel();
   };
 })();
 </script>
